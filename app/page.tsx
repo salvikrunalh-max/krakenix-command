@@ -4,44 +4,60 @@ import { useState } from 'react';
 
 export default function KrakenixCommand() {
   const [command, setCommand] = useState('');
-  const [response, setResponse] = useState('Ready to execute. Type a command like "Build roofing proposal" or "Research leads"');
+  const [response, setResponse] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleCommand = async () => {
+  const executeCommand = async () => {
     if (!command.trim()) return;
-    setResponse('🦑 Krakenix brain executing...');
+    
+    setIsLoading(true);
+    setResponse('');
+    
     try {
       const res = await fetch('/api/command', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ command }),
       });
+      
       const data = await res.json();
-      setResponse(data.result || 'Executed successfully.');
-    } catch (e) {
-      setResponse('Connection error. Make sure dev server is running.');
+      setResponse(data.response);
+    } catch (error) {
+      setResponse('❌ Connection error. Check console.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-8 font-mono">
-      <h1 className="text-4xl mb-8">🦑 Krakenix Command OS v1</h1>
-      <div className="max-w-2xl">
-        <textarea
+    <div style={{ padding: '40px', fontFamily: 'system-ui', maxWidth: '800px', margin: '0 auto' }}>
+      <h1 style={{ color: '#00ff9f' }}>🦑 Krakenix Command OS v1</h1>
+      <p>Empire Execution Engine — Type natural commands</p>
+      
+      <div style={{ margin: '30px 0' }}>
+        <input
+          type="text"
           value={command}
           onChange={(e) => setCommand(e.target.value)}
-          className="w-full h-32 bg-zinc-900 p-4 text-lg rounded border border-zinc-700"
-          placeholder="Type natural command..."
+          onKeyPress={(e) => e.key === 'Enter' && executeCommand()}
+          placeholder="Build roofing proposal, Research leads, etc."
+          style={{ width: '100%', padding: '15px', fontSize: '16px', borderRadius: '8px', border: '1px solid #333' }}
+          disabled={isLoading}
         />
-        <button
-          onClick={handleCommand}
-          className="mt-4 bg-white text-black px-8 py-3 rounded hover:bg-zinc-200 font-bold"
+        <button 
+          onClick={executeCommand}
+          disabled={isLoading}
+          style={{ marginTop: '10px', padding: '12px 30px', background: '#00ff9f', color: 'black', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}
         >
-          EXECUTE COMMAND
+          {isLoading ? 'Executing...' : 'EXECUTE COMMAND'}
         </button>
-        <div className="mt-8 p-6 bg-zinc-900 rounded border border-zinc-700 whitespace-pre-wrap min-h-[200px]">
+      </div>
+
+      {response && (
+        <div style={{ background: '#111', padding: '20px', borderRadius: '8px', whiteSpace: 'pre-wrap', marginTop: '20px' }}>
           {response}
         </div>
-      </div>
+      )}
     </div>
   );
 }
