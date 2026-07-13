@@ -58,6 +58,15 @@ export default function KrakenixCommand() {
           {response}
         </div>
       )}
+            <div style={{ marginTop: '30px' }}>
+        <a 
+          href="/api/schedule" 
+          target="_blank"
+          style={{ color: '#00ff9f', textDecoration: 'none' }}
+        >
+          🔄 Check Scheduler Status (Auto Task)
+        </a>
+      </div>
     </div>
   );
 }
